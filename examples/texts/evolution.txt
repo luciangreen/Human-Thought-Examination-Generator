@@ -1,0 +1,12 @@
+Natural selection is the mechanism by which heritable traits that improve
+survival or reproduction become more common in a population over successive
+generations. It requires variation in traits, heritability of those traits,
+and differential survival or reproduction.
+
+Genetic drift is a different mechanism: random changes in allele frequency
+due to chance events rather than selection pressure. Drift has a stronger
+effect in small populations.
+
+A key assumption of standard evolutionary models is that populations are
+large enough for drift to be negligible. This assumption does not always hold
+in real populations, particularly during population bottlenecks.

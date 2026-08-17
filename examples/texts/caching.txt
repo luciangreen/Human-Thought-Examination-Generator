@@ -1,0 +1,10 @@
+Caching can make repeated computation faster by storing previous results.
+It uses additional memory and is useful only where the cost of retrieving
+a stored result is lower than recomputing it.
+
+A cache hit occurs when the requested data is already stored. A cache miss
+occurs when it is not, requiring fresh computation and storage of the result.
+The hit rate determines overall efficiency.
+
+Cache invalidation is necessary when stored results become stale.
+Deciding when to invalidate is a well-known difficulty in systems design.
