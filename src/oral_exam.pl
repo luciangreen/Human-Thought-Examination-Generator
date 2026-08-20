@@ -3,7 +3,6 @@
 
 :- module(oral_exam, [
     generate_oral_exam/3,
-    oral_question/2,
     follow_up/4,
     next_question/3,
     response_quality/1,
@@ -74,11 +73,6 @@ follow_up_text(_, competent,
     "Can you give a concrete example to support your answer?").
 follow_up_text(_, exceptional,
     "Can you generalise this to a broader principle?").
-
-%% oral_question(+Id, -Text)  [declarative access — succeeds when the given
-%%   Id matches a question inside a previously generated oral_exam term that
-%%   was asserted or passed explicitly; otherwise use the Exam term directly]
-oral_question(_Id, '').
 
 %% follow_up(+BaseId, +Quality, -FollowUpId, -Text)
 %% Returns the follow-up question ID and text for a base question and quality.
