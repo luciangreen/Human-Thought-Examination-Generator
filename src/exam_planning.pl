@@ -132,7 +132,8 @@ pipeline(Text, Options, Questions) :-
     order_question_dependencies(Covered, Ordered),
     construct_exam(Ordered, Options, exam(_, Numbered)),
     extract_all_questions(Numbered, NQ),
-    unwrap_numbered(NQ, Questions).
+    unwrap_numbered(NQ, Questions),
+    !.
 
 unwrap_numbered([], []).
 unwrap_numbered([numbered_question(_, Q)|Rest], [Q|Qs]) :-

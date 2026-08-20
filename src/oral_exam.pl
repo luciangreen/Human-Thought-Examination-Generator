@@ -3,7 +3,6 @@
 
 :- module(oral_exam, [
     generate_oral_exam/3,
-    oral_question/2,
     follow_up/4,
     next_question/3,
     response_quality/1,
@@ -16,7 +15,8 @@
 generate_oral_exam(Text, Options, oral_exam(Options, OralQuestions)) :-
     pipeline(Text, Options, Questions),
     maplist(make_oral_question, Questions, OralQuestions0),
-    add_follow_ups(OralQuestions0, OralQuestions).
+    add_follow_ups(OralQuestions0, OralQuestions),
+    !.
 
 make_oral_question(question(Id, Type, Text, Source, Level, Reason),
                    oral_question_item(Id, Type, Text, Source, Level, Reason)).
@@ -74,25 +74,26 @@ follow_up_text(_, competent,
 follow_up_text(_, exceptional,
     "Can you generalise this to a broader principle?").
 
-%% oral_question(+Id, -Text)  [declarative access]
-oral_question(Id, Text) :-
-    oral_question_full(Id, _, Text, _, _, _, _).
-
 %% follow_up(+BaseId, +Quality, -FollowUpId, -Text)
+%% Returns the follow-up question ID and text for a base question and quality.
 follow_up(BaseId, Quality, FUId, Text) :-
-    follow_up(BaseId, Quality, FUId, Text).
+    atom_concat(BaseId, '_fu_', Prefix),
+    atom_concat(Prefix, Quality, FUId),
+    once(follow_up_text(_, Quality, Text)).
 
 %% next_question(+CurrentId, +Quality, -NextText)
 next_question(CurrentId, insufficient, Text) :-
-    atom_concat(CurrentId, '_fu_insufficient', FId),
-    follow_up_text(_, insufficient, Text),
-    ( atom(FId) -> true ; true ).  % make deterministic
+    atom_concat(CurrentId, '_fu_insufficient', _FId),
+    once(follow_up_text(_, insufficient, Text)),
+    !.
 next_question(CurrentId, competent, Text) :-
     atom_concat(CurrentId, '_fu_competent', _FId),
-    follow_up_text(_, competent, Text).
+    once(follow_up_text(_, competent, Text)),
+    !.
 next_question(CurrentId, exceptional, Text) :-
     atom_concat(CurrentId, '_fu_exceptional', _FId),
-    follow_up_text(_, exceptional, Text).
+    once(follow_up_text(_, exceptional, Text)),
+    !.
 next_question(_, strong, Text) :-
     follow_up_text(_, competent, Text).
 next_question(_, partial, Text) :-

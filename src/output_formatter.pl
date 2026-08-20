@@ -65,11 +65,11 @@ format_question_text(Q, Text) :-
 
 format_oral_question_text(oral_question_full(Id, _, QText, _, level(L), _, FUs), Text) :-
     !,
-    format(atom(QLine), "Q~w [Level ~w]: ~w~n", [Id, L, QText]),
+    format(atom(QLine), "[~w | Level ~w]: ~w~n", [Id, L, QText]),
     maplist(format_follow_up_text, FUs, FUParts),
     atomic_list_concat([QLine|FUParts], '  ', Text).
 format_oral_question_text(oral_question_item(Id, _, QText, _, level(L), _), Text) :-
-    format(atom(Text), "Q~w [Level ~w]: ~w~n", [Id, L, QText]).
+    format(atom(Text), "[~w | Level ~w]: ~w~n", [Id, L, QText]).
 format_oral_question_text(Q, Text) :-
     format(atom(Text), "~w~n", [Q]).
 

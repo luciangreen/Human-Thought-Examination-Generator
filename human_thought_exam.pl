@@ -46,7 +46,8 @@ human_thought_exam(Text, Options, Exam) :-
     merge_redundant_questions(Strong, Reduced),
     ensure_thought_coverage(ThoughtUnits, Reduced, Covered),
     order_question_dependencies(Covered, Ordered),
-    construct_exam(Ordered, Options, Exam).
+    construct_exam(Ordered, Options, Exam),
+    !.
 
 %% text_exam(+PathOrText, +Options, -Exam)
 %%
@@ -65,14 +66,16 @@ text_exam(PathOrText, Options, Exam) :-
         exam_planning:generate_assignment(Text, Options, Exam)
     ;
         human_thought_exam(Text, Options, Exam)
-    ).
+    ),
+    !.
 
 %% generate_synthesis_exam(+Texts, +Options, -Exam)
 %% Texts: list of text atoms/strings
 generate_synthesis_exam(Texts, Options, Exam) :-
     atomic_list_concat(Texts, ' ', Combined),
     Options1 = [synthesis(true)|Options],
-    human_thought_exam(Combined, Options1, Exam).
+    human_thought_exam(Combined, Options1, Exam),
+    !.
 
 %% ============================================================
 %% File I/O

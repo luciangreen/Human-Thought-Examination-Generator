@@ -14,7 +14,8 @@
 analyse_text(Text, analysis(Words, Sentences, Paragraphs)) :-
     word_count(Text, Words),
     split_into_sentences(Text, Sentences),
-    split_into_paragraphs(Text, Paragraphs).
+    split_into_paragraphs(Text, Paragraphs),
+    !.
 
 %% word_count(+Text, -Count)
 word_count(Text, Count) :-
