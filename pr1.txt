@@ -1,0 +1,902 @@
+GitHub Agent Prolog Program Requirements
+
+Human Thought Examination Generator
+
+1. Purpose
+
+Develop a Prolog program that converts source texts, specifications, essays, notes, lectures, research material, or other intellectual content into a rigorous human-computed thinking task.
+
+The program must not primarily answer the intellectual questions itself. Its purpose is to identify the important reasoning contained or implied in the material, convert that reasoning into high-quality questions, and arrange those questions so that a human can independently reconstruct, criticise, extend, and apply the ideas.
+
+The intended result is that important reasoning normally delegated to a chatbot can instead be performed by the human as:
+
+* an assignment;
+* a spoken-word examination;
+* an oral viva;
+* a computerless written examination;
+* a discussion or tutorial;
+* or a structured self-questioning exercise.
+
+The system therefore acts as a thought curriculum and examination generator, rather than as a substitute thinker.
+
+2. Central Principle
+
+Given a source text T, derive a compact question set Q such that completing Q requires the human to reproduce the important intellectual work associated with T.
+
+Conceptually:
+
+text_to_human_thought_exam(Text, Exam).
+
+The desired transformation is:
+
+source material
+    ↓
+identify claims, concepts and problems
+    ↓
+identify reasoning required to understand them
+    ↓
+identify assumptions, alternatives and implications
+    ↓
+reduce duplicated or trivial reasoning
+    ↓
+construct rigorous questions
+    ↓
+order questions into an intellectual progression
+    ↓
+human performs the reasoning
+
+The program must optimise for quality of thought elicited, not simply number of questions.
+
+3. Core Functional Requirements
+
+The program must:
+
+1. accept one or more source texts;
+2. divide them into meaningful intellectual units;
+3. identify the central task or problem represented by each unit;
+4. distinguish facts from reasoning tasks;
+5. identify important claims, concepts, definitions, mechanisms, arguments, assumptions and conclusions;
+6. determine what a competent human would need to think through rather than merely remember;
+7. turn those requirements into intellectually demanding questions;
+8. eliminate questions that merely ask for superficial paraphrase;
+9. combine overlapping questions;
+10. order questions so that later questions can build upon earlier reasoning;
+11. generate assignment, oral-exam and computerless-exam forms;
+12. generate marking criteria describing the qualities expected in good reasoning without supplying a complete model answer by default.
+
+4. Human-First Constraint
+
+The generated examination must be designed so that the human performs the substantive reasoning.
+
+The default system must therefore avoid generating full answers.
+
+For example, instead of:
+
+Question:
+Why does X cause Y?
+Answer:
+X causes Y because A, B and C.
+
+generate:
+
+Why might X cause Y?
+Identify the intermediate mechanisms required for this conclusion.
+Which assumptions must hold?
+What evidence would distinguish this explanation from plausible alternatives?
+
+An optional teacher-only mode may produce answer outlines for assessment, but student examination material must remain answer-free.
+
+5. Intellectual Decomposition
+
+For each source unit, the program must attempt to identify:
+
+claim(Claim).
+definition(Term, Definition).
+problem(Problem).
+goal(Goal).
+assumption(Assumption).
+evidence(Evidence).
+inference(Premises, Conclusion).
+mechanism(Cause, Process, Effect).
+comparison(A, B).
+dependency(A, B).
+constraint(Constraint).
+example(Example).
+counterexample(Counterexample).
+uncertainty(Issue).
+implication(Condition, Consequence).
+
+These need not all be explicitly stated in the source. The program may infer candidate reasoning relationships where justified, but inferred material must be marked separately from explicitly stated material.
+
+6. Core-Task Reduction
+
+The system must identify the smallest useful collection of questions capable of eliciting the major reasoning in the text.
+
+For example, ten paragraphs discussing variations of one underlying issue should not automatically produce ten independent comprehension questions.
+
+The program should attempt to derive:
+
+core_task(TextUnit, Task).
+
+Possible core tasks include:
+
+explain_mechanism.
+derive_conclusion.
+compare_models.
+construct_argument.
+criticise_argument.
+resolve_contradiction.
+design_solution.
+generalise_rule.
+apply_rule.
+identify_assumptions.
+evaluate_evidence.
+predict_consequences.
+synthesise_sources.
+
+7. Question Types
+
+The program must support questions requiring the student to:
+
+* define an idea precisely;
+* explain it in their own words;
+* reconstruct an argument;
+* derive a conclusion from premises;
+* explain a mechanism;
+* distinguish correlation from causation;
+* identify assumptions;
+* identify missing information;
+* compare competing explanations;
+* produce counterexamples;
+* defend an interpretation;
+* criticise an interpretation;
+* resolve apparently conflicting claims;
+* determine necessary and sufficient conditions;
+* generalise a rule;
+* identify where a generalisation fails;
+* transfer an idea to a novel example;
+* design an algorithm, procedure, experiment or solution;
+* predict consequences;
+* rank alternatives;
+* justify a decision;
+* integrate several parts of the source;
+* formulate an original position supported by reasoning.
+
+8. Thought Quality
+
+Questions must preferentially require one or more of:
+
+reasoning.
+analysis.
+synthesis.
+evaluation.
+application.
+abstraction.
+counterfactual_reasoning.
+causal_reasoning.
+logical_derivation.
+creative_problem_solving.
+
+Questions consisting purely of fact retrieval should be retained only when the fact is necessary scaffolding for subsequent reasoning.
+
+For example:
+
+Weak:
+
+What does the author call this method?
+
+Stronger:
+
+What problem is this method intended to solve, and which properties of the method allow it to solve that problem?
+
+9. Question Chains
+
+Questions should form reasoning chains where appropriate.
+
+Example:
+
+1. What is the author's central claim?
+2. Which premises are necessary for that claim?
+3. Which premise is least secure?
+4. What follows if that premise is removed?
+5. Construct an alternative explanation.
+6. What evidence could discriminate between the two explanations?
+7. Which explanation should currently be preferred, and why?
+
+Represent these dependencies explicitly:
+
+requires(question_4, question_2).
+requires(question_5, question_1).
+requires(question_7, question_5).
+requires(question_7, question_6).
+
+The system must avoid requiring answers to later questions before the conceptual material needed for them has been elicited.
+
+10. Assignment Mode
+
+Support:
+
+generate_assignment(Text, Options, Assignment).
+
+An assignment should contain a manageable set of major questions requiring extended reasoning.
+
+The assignment may specify:
+
+word_limit(2000).
+question_count(8).
+difficulty(university).
+open_book(true).
+references_allowed(true).
+
+The assignment should reward the student’s own structured reasoning rather than their ability to reproduce source wording.
+
+11. Computerless Examination Mode
+
+Support:
+
+generate_computerless_exam(Text, Options, Exam).
+
+The examination must be completable without:
+
+* a chatbot;
+* a search engine;
+* programming tools;
+* internet access;
+* or a computer, unless explicitly permitted.
+
+Questions therefore need to contain sufficient context for the reasoning requested.
+
+The exam generator should distinguish between information that may reasonably be memorised and information that should be supplied in the paper.
+
+For example, a long dataset may be supplied while the student is required to analyse it manually.
+
+12. Spoken-Word Examination Mode
+
+Support:
+
+generate_oral_exam(Text, Options, Exam).
+
+Questions must be speakable and understandable when heard once.
+
+Prefer shorter initial questions followed by adaptive probes.
+
+Example:
+
+Examiner:
+What is the main problem the author's method attempts to solve?
+Student answers.
+Examiner:
+Why does that problem arise?
+Student answers.
+Examiner:
+Suppose one of those conditions were removed. Would the method still be necessary?
+
+Represent follow-up structure as:
+
+oral_question(Q1).
+follow_up(Q1, adequate, Q2).
+follow_up(Q1, incomplete, Q3).
+follow_up(Q1, exceptional, Q4).
+
+The system should support viva-style probing rather than merely reading a written examination aloud.
+
+13. Adaptive Oral Examination
+
+The oral mode should optionally alter subsequent questions according to demonstrated understanding.
+
+Possible classifications:
+
+response_quality(insufficient).
+response_quality(partial).
+response_quality(competent).
+response_quality(strong).
+response_quality(exceptional).
+
+An incomplete response should trigger a clarifying or foundational question.
+
+A strong response should trigger a deeper question rather than unnecessary repetition.
+
+For example:
+
+next_question(Current, insufficient, FoundationQuestion).
+next_question(Current, competent, ExtensionQuestion).
+next_question(Current, exceptional, ResearchQuestion).
+
+14. Progressive Difficulty
+
+Questions should be classifiable approximately as:
+
+level(1, comprehension).
+level(2, explanation).
+level(3, application).
+level(4, analysis).
+level(5, synthesis).
+level(6, evaluation).
+level(7, original_contribution).
+
+An examination should normally progress through several levels rather than asking only highly abstract questions without preparation.
+
+15. Question Compression
+
+The program must remove redundant questions.
+
+For example:
+
+What is X?
+Explain X.
+Describe X.
+What does X mean?
+
+should normally become one stronger question.
+
+Possible transformation:
+
+Define X precisely, explain why the distinction embodied by the definition matters, and give one case that satisfies the definition and one that does not.
+
+Implement predicates such as:
+
+questions_overlap(Q1, Q2).
+merge_questions(Q1, Q2, Q3).
+remove_redundant_questions(Questions0, Questions).
+
+16. Thought Coverage
+
+The program must estimate whether the question set covers the important reasoning in the source.
+
+For example:
+
+thought_unit(t1, causal_explanation).
+thought_unit(t2, assumption).
+thought_unit(t3, counterargument).
+covers(q1, t1).
+covers(q2, t2).
+covers(q3, t2).
+covers(q4, t3).
+
+The generator should seek high coverage with relatively few questions.
+
+A simple objective may be:
+
+maximise:
+    intellectual_coverage
+    + reasoning_depth
+    + transfer
+    + originality
+minimise:
+    redundancy
+    + trivia
+    + unnecessary_memory_load
+    + answer_leakage
+    + question_count
+
+17. Answer Leakage Prevention
+
+The system must detect questions that accidentally reveal their own answers.
+
+Poor:
+
+How does the author's three-stage process of observation,
+classification and inference produce the result?
+
+when identifying those three stages is itself part of the task.
+
+Prefer:
+
+Reconstruct the process by which the author moves from observations to the result. Identify and justify each distinct stage.
+
+Implement:
+
+answer_leakage(Question, Degree).
+rewrite_to_reduce_leakage(Question0, Question).
+
+18. Prompt Independence
+
+The examination must not require the student to know how the generator itself operates.
+
+Questions should refer directly to subject matter.
+
+Avoid:
+
+According to the analysis generated above...
+
+Prefer:
+
+What assumptions are required for the proposed mechanism to work?
+
+19. Source Fidelity
+
+Generated questions must remain grounded in the supplied material.
+
+The program may ask students to extend, criticise or generalise the source, but it must distinguish:
+
+source_question.
+inference_question.
+extension_question.
+research_question.
+
+The system must not silently introduce invented claims and attribute them to the source.
+
+20. Multiple-Text Synthesis
+
+Support:
+
+generate_synthesis_exam(Texts, Options, Exam).
+
+The generator should identify agreements, disagreements, differences in assumptions and complementary ideas.
+
+Example questions:
+
+Which problem do both texts attempt to solve?
+Where do their explanations diverge?
+Are the two positions genuinely incompatible, or do they operate at different levels?
+Construct a synthesis retaining the strongest element of each account.
+What new problem appears after the synthesis?
+
+21. Socratic Mode
+
+Provide an optional mode in which the entire examination is organised as a sequence of questions without explanatory teaching text.
+
+mode(socratic).
+
+The sequence should guide the human toward discoveries without simply stating them.
+
+The questions must remain genuine intellectual tasks rather than leading questions whose wording contains the intended conclusion.
+
+22. Researcher Mode
+
+A high-level mode should transform material into questions that could produce genuinely new intellectual work.
+
+Examples:
+
+Which assumption has not been independently justified?
+Can the mechanism be expressed more generally?
+Under what circumstances would the claimed optimisation become slower?
+What observation would falsify the proposed explanation?
+Can two apparently distinct techniques be represented as instances of one more general operation?
+What is the smallest counterexample to the proposed rule?
+
+23. Question Scoring
+
+Internally score candidate questions according to features such as:
+
+question_score(
+    Question,
+    score(
+        relevance(Relevance),
+        depth(Depth),
+        novelty(Novelty),
+        reasoning(Reasoning),
+        transfer(Transfer),
+        clarity(Clarity),
+        answer_leakage(Leakage),
+        redundancy(Redundancy)
+    )
+).
+
+High-quality questions should have:
+
+* high relevance;
+* high reasoning demand;
+* high clarity;
+* useful transfer;
+* low redundancy;
+* low answer leakage.
+
+24. Marking Rubrics
+
+Generate rubrics rather than complete student answers.
+
+Example:
+
+High-quality response:
+- identifies the central mechanism;
+- distinguishes necessary from incidental features;
+- explicitly states major assumptions;
+- considers at least one plausible alternative;
+- gives a logically supported conclusion.
+
+Represent as:
+
+criterion(Q, identifies_core_issue, 3).
+criterion(Q, explains_mechanism, 4).
+criterion(Q, tests_assumptions, 3).
+
+Rubrics should assess quality of thinking, not exact wording.
+
+25. Teacher Answer Mode
+
+An optional restricted mode may generate:
+
+teacher_outline(Question, Outline).
+
+The outline should normally contain:
+
+* expected concepts;
+* possible reasoning pathway;
+* alternative defensible answers;
+* common mistakes;
+* assessment criteria.
+
+It should not be included in the student examination output.
+
+26. Human Originality
+
+Some questions should explicitly require the human to contribute material not contained verbatim in the input.
+
+For example:
+
+Construct your own example.
+Construct the strongest objection you can.
+Design an alternative procedure.
+Identify an unexpected implication.
+Formulate a more general principle.
+Find a case in which the proposed approach fails.
+Suggest an experiment capable of distinguishing competing explanations.
+
+This requirement is central to transferring intellectual work from chatbot computation back to human reasoning.
+
+27. Oral Response Constraints
+
+The system should support time-limited spoken answers:
+
+answer_time(q1, seconds(30)).
+answer_time(q2, minutes(2)).
+answer_time(q3, minutes(5)).
+
+Short-response questions should test precision.
+
+Longer responses should test structured reasoning and synthesis.
+
+28. Examiner Prompts
+
+Generate examiner-only prompts such as:
+
+Ask for justification if a conclusion is asserted without reasoning.
+Ask for an example if the response remains abstract.
+Ask for a counterexample if the student appears overconfident in a generalisation.
+Ask which assumption is most vulnerable.
+Ask what would change the student's conclusion.
+
+These should support genuine dialogue without dictating a single approved answer.
+
+29. Input Formats
+
+At minimum accept:
+
+text(String).
+file(Path).
+paragraphs(List).
+sections(List).
+
+Optional future inputs may include:
+
+pdf_text(Text).
+lecture_transcript(Text).
+essay(Text).
+program_specification(Text).
+research_notes(Text).
+source_code(Code).
+
+30. Output Formats
+
+At minimum support:
+
+assignment.
+written_exam.
+oral_exam.
+viva.
+socratic_questions.
+tutorial_questions.
+revision_questions.
+teacher_rubric.
+
+Text and Prolog-term output must both be available.
+
+Example:
+
+exam([
+    question(q1, "..."),
+    question(q2, "..."),
+    question(q3, "...")
+]).
+
+31. Difficulty Controls
+
+Support:
+
+difficulty(primary).
+difficulty(secondary).
+difficulty(undergraduate).
+difficulty(postgraduate).
+difficulty(research).
+difficulty(expert).
+
+Difficulty must primarily alter intellectual sophistication, not merely vocabulary.
+
+A research-level question should require more complex reasoning, stronger criticism, synthesis, uncertainty handling or originality.
+
+32. Discipline Awareness
+
+The same core framework should work across disciplines, while recognising different legitimate forms of reasoning.
+
+For example:
+
+discipline(mathematics).
+discipline(science).
+discipline(computer_science).
+discipline(philosophy).
+discipline(history).
+discipline(literature).
+discipline(business).
+discipline(law).
+
+Examples:
+
+Mathematics:
+
+derive, prove, construct counterexample, generalise
+
+Science:
+
+explain mechanism, design experiment, evaluate evidence, predict
+
+Computer science:
+
+trace algorithm, derive invariant, analyse complexity, redesign
+
+Philosophy:
+
+reconstruct argument, expose assumption, object, defend, synthesise
+
+History:
+
+interpret evidence, compare explanations, evaluate causation
+
+33. No Artificial Single-Answer Requirement
+
+The system must not assume every high-level question has one predetermined answer.
+
+Questions may support multiple defensible positions.
+
+The marking system should reward:
+
+coherence.
+evidence.
+logical_support.
+awareness_of_alternatives.
+precision.
+originality.
+
+rather than mere agreement with the source.
+
+34. Intellectual Safety Against Hallucination
+
+When source material does not contain enough information for a particular question, the generator must either:
+
+1. supply the necessary context;
+2. mark the question as an extension requiring independent reasoning; or
+3. omit it.
+
+It must not invent supposed source content.
+
+35. Minimal Example
+
+Input:
+
+Caching can make repeated computation faster by storing previous
+results. It uses additional memory and is useful only where the cost
+of retrieving a stored result is lower than recomputing it.
+
+Unsatisfactory output:
+
+What is caching?
+
+Preferred output:
+
+1. Explain the mechanism by which caching can reduce computation time.
+2. Derive the conditions under which caching provides a net benefit.
+3. Construct a case in which caching makes a program worse.
+4. Which measurements would you need in order to decide whether to
+   introduce caching into an unfamiliar algorithm?
+5. Can you derive a general decision rule for whether a computed value
+   should be cached?
+
+The preferred version causes the human to reconstruct and extend the underlying reasoning.
+
+36. Prolog Architecture
+
+Suggested modules:
+
+:- module(text_analysis, []).
+:- module(concept_extraction, []).
+:- module(reasoning_analysis, []).
+:- module(core_task_reduction, []).
+:- module(question_generation, []).
+:- module(question_scoring, []).
+:- module(question_compression, []).
+:- module(exam_planning, []).
+:- module(oral_exam, []).
+:- module(rubric_generation, []).
+:- module(output_formatter, []).
+
+Suggested pipeline:
+
+human_thought_exam(Text, Options, Exam) :-
+    analyse_text(Text, Analysis),
+    extract_thought_units(Analysis, ThoughtUnits),
+    derive_core_tasks(ThoughtUnits, Tasks),
+    generate_candidate_questions(Tasks, Candidates),
+    score_questions(Candidates, Scored),
+    remove_weak_questions(Scored, Strong),
+    merge_redundant_questions(Strong, Reduced),
+    ensure_thought_coverage(ThoughtUnits, Reduced, Covered),
+    order_question_dependencies(Covered, Ordered),
+    construct_exam(Ordered, Options, Exam).
+
+37. Deterministic Prolog Preference
+
+Where practical, the implementation should favour deterministic transformations.
+
+Processing stages should use clear input/output predicates such as:
+
+analyse_text(+Text, -Analysis).
+extract_thought_units(+Analysis, -Units).
+derive_core_tasks(+Units, -Tasks).
+generate_questions(+Tasks, -Questions).
+rank_questions(+Questions, -Ranked).
+construct_exam(+Ranked, +Options, -Exam).
+
+Uncontrolled accidental choicepoints should be avoided.
+
+38. Explainability
+
+Every generated question should optionally carry a machine-readable explanation of why it was included.
+
+Example:
+
+question_reason(
+    q7,
+    tests(
+        assumption_identification,
+        causal_reasoning,
+        transfer
+    )
+).
+
+This metadata is for developers and teachers and must not normally appear on the student paper.
+
+39. Tests
+
+The repository must contain tests covering at least:
+
+* short explanatory text;
+* argumentative essay;
+* contradictory source;
+* technical specification;
+* source containing many repeated ideas;
+* source dominated by factual information;
+* multiple competing theories;
+* mathematical reasoning;
+* scientific reasoning;
+* programming material;
+* philosophical material;
+* assignment generation;
+* written examination generation;
+* spoken examination generation;
+* adaptive oral follow-ups;
+* question compression;
+* answer-leakage detection;
+* source-fidelity checking;
+* rubric generation;
+* multiple valid interpretations.
+
+40. Quality Tests
+
+The tests should verify properties such as:
+
+test(no_duplicate_questions).
+test(core_claim_covered).
+test(major_assumptions_examined).
+test(no_student_answers_in_exam).
+test(question_dependencies_valid).
+test(source_claims_not_invented).
+test(oral_questions_speakable).
+test(computerless_exam_self_contained).
+
+Where exact question wording is variable, tests should evaluate structural properties rather than require one exact string.
+
+41. Benchmarking
+
+Include benchmark source texts and compare:
+
+number of source words
+number of extracted thought units
+number of candidate questions
+number of final questions
+thought-unit coverage
+redundancy removed
+question difficulty distribution
+estimated answer leakage
+
+The purpose of the benchmark is not to maximise question count.
+
+A successful generator should often turn a large text into a comparatively small but intellectually dense examination.
+
+42. GitHub Agent Workflow
+
+The GitHub Agent must:
+
+1. inspect the repository before modifying it;
+2. write or update PROGRAM_REQUIREMENTS.md;
+3. implement the program in staged modules;
+4. create tests with each stage;
+5. run the complete test suite after substantive changes;
+6. repair failures without weakening the intended requirements;
+7. document predicates and command-line usage;
+8. provide example source texts and generated examinations;
+9. ensure student output does not accidentally contain teacher answers;
+10. perform a final self-review against these requirements.
+
+43. Suggested Command-Line Interface
+
+Example:
+
+swipl -q -s human_thought_exam.pl -- \
+  --input essay.txt \
+  --mode oral \
+  --difficulty postgraduate
+
+Alternative Prolog interface:
+
+?- text_exam(
+       "essay.txt",
+       [
+           mode(computerless),
+           difficulty(undergraduate),
+           duration(minutes(120)),
+           questions(10)
+       ],
+       Exam
+   ).
+
+44. Acceptance Criteria
+
+The first usable release is complete when it can take an unfamiliar substantive text and produce a compact examination in which:
+
+* the central intellectual tasks are represented;
+* major reasoning cannot be completed merely through copying passages;
+* the questions require the human to perform analysis;
+* obvious duplicate questions have been removed;
+* answers are not embedded in question wording;
+* the examination has a coherent progression;
+* oral questions can be used without a computer;
+* written questions can be attempted without chatbot assistance;
+* teachers can obtain rubrics independently of student output;
+* source claims and generator inferences are distinguishable;
+* tests demonstrate consistent performance over several disciplines.
+
+45. Governing Design Principle
+
+The system should continually apply the following transformation:
+
+Do not ask:
+"What answer can the chatbot produce from this text?"
+Ask:
+"What sequence of questions would cause a capable human to perform
+the valuable reasoning themselves?"
+
+The final product should therefore behave as an intellectual task compiler:
+
+TEXT
+  ↓
+THOUGHT STRUCTURE
+  ↓
+CORE REASONING TASKS
+  ↓
+RIGOROUS QUESTIONS
+  ↓
+ASSIGNMENT / VIVA / COMPUTERLESS EXAM
+  ↓
+HUMAN THINKING
+
+The principal measure of success is not how much intelligence the program displays in its output, but how much high-quality reasoning its questions successfully elicit from the human.
