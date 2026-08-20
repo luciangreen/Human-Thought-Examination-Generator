@@ -25,7 +25,8 @@ question_score(question(_Id, Type, Text, Source, Level, _Reason), score(R, D, N,
     transfer_score(Type, T),
     clarity_score(Text, Cl),
     answer_leakage_score(Text, AL),
-    redundancy_score(Type, Red).
+    redundancy_score(Type, Red),
+    !.
 
 relevance_score(source,    3).
 relevance_score(inference, 2).
@@ -82,13 +83,15 @@ answer_leakage_detected(Text) :-
     ;   sub_atom(Text, _, _, _, 'this works by')
     ;   sub_atom(Text, _, _, _, 'the three ')
     ;   sub_atom(Text, _, _, _, 'the two ')
-    ).
+    ),
+    !.
 answer_leakage_detected(Text) :-
     string(Text),
     (   sub_string(Text, _, _, _, "because ")
     ;   sub_string(Text, _, _, _, "the answer is")
     ;   sub_string(Text, _, _, _, "this works by")
-    ).
+    ),
+    !.
 
 redundancy_score(derive_conclusion, 0).
 redundancy_score(_, 0).

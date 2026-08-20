@@ -11,7 +11,8 @@
 %% generate_rubric(+Question, -Rubric)
 generate_rubric(question(Id, Type, _Text, _Source, Level, _Reason),
                 rubric(Id, Level, Criteria)) :-
-    rubric_criteria(Type, Level, Criteria).
+    rubric_criteria(Type, Level, Criteria),
+    !.
 
 %% rubric_criteria(+QuestionType, +Level, -Criteria)
 rubric_criteria(explain_mechanism, Level, Criteria) :-
@@ -157,11 +158,11 @@ expected_concepts(_, ["core concept", "supporting argument", "implication"]).
 
 reasoning_path(Type, Text, Path) :-
     format(atom(Path),
-        "Expected reasoning path for ~w: \
-        (1) Identify the core claim in the source. \
-        (2) Enumerate the relevant considerations. \
-        (3) Assess the strongest and weakest points. \
-        (4) Reach a supported conclusion. \
+        "Expected reasoning path for ~w: \c
+        (1) Identify the core claim in the source. \c
+        (2) Enumerate the relevant considerations. \c
+        (3) Assess the strongest and weakest points. \c
+        (4) Reach a supported conclusion. \c
         Question text: ~w",
         [Type, Text]).
 

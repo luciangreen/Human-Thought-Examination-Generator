@@ -11,7 +11,8 @@
 %% Questions = list of question(Id, Type, Text, Source, Level, Reason)
 generate_candidate_questions(Tasks, Questions) :-
     foldl(generate_from_task, Tasks, 1-[], _-QsRev),
-    reverse(QsRev, Questions).
+    reverse(QsRev, Questions),
+    !.
 
 generate_from_task(core_task(Task, Units), N-Acc, N2-Acc2) :-
     generate_questions_for_task(Task, Units, N, NewQs, N2),

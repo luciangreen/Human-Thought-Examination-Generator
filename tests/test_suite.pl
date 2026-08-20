@@ -111,10 +111,10 @@ test(includes_assumption_or_criticism) :-
     argumentative_text(T),
     human_thought_exam(T, [], exam(_, Numbered)),
     extract_question_types(Numbered, Types),
-    (   member(identify_assumptions, Types)
-    ;   member(criticise_argument, Types)
-    ;   member(derive_conclusion, Types)
-    ).
+    once((   member(identify_assumptions, Types)
+         ;   member(criticise_argument, Types)
+         ;   member(derive_conclusion, Types)
+         )).
 
 :- end_tests(argumentative_essay).
 
@@ -182,7 +182,7 @@ test(generates_comparison_questions) :-
     competing_theories_text(T),
     human_thought_exam(T, [], exam(_, Numbered)),
     extract_question_types(Numbered, Types),
-    ( member(compare_models, Types) ; member(derive_conclusion, Types) ).
+    once(( member(compare_models, Types) ; member(derive_conclusion, Types) )).
 
 :- end_tests(competing_theories).
 
@@ -208,10 +208,10 @@ test(generates_mechanism_or_assumption_questions) :-
     science_text(T),
     human_thought_exam(T, [], exam(_, Numbered)),
     extract_question_types(Numbered, Types),
-    ( member(explain_mechanism, Types)
-    ; member(identify_assumptions, Types)
-    ; member(derive_conclusion, Types)
-    ).
+    once((  member(explain_mechanism, Types)
+        ;   member(identify_assumptions, Types)
+        ;   member(derive_conclusion, Types)
+        )).
 
 :- end_tests(scientific_reasoning).
 
@@ -287,7 +287,7 @@ test(generates_oral_exam) :-
 test(oral_questions_have_follow_ups) :-
     short_text(T),
     generate_oral_exam(T, [], oral_exam(_, OQs)),
-    member(OQ, OQs),
+    once(member(OQ, OQs)),
     (   OQ = oral_question_full(_, _, _, _, _, _, FUs)
     ->  FUs \= []
     ;   true  % oral_question_item is also acceptable
@@ -394,8 +394,7 @@ test(generates_rubric) :-
 test(rubric_has_criteria_with_marks) :-
     Q = question(q1, derive_conclusion, 'What follows from X?', source, level(3), reason(r)),
     generate_rubric(Q, rubric(_, _, Criteria)),
-    member(criterion(_, Mark), Criteria),
-    number(Mark), Mark > 0.
+    once(( member(criterion(_, Mark), Criteria), number(Mark), Mark > 0 )).
 
 test(no_teacher_answers_in_student_output) :-
     short_text(T),

@@ -34,15 +34,3 @@ unit_type_to_task(comparison,        compare_models).
 unit_type_to_task(counterargument,   criticise_argument).
 unit_type_to_task(evidence,          evaluate_evidence).
 unit_type_to_task(implication,       predict_consequences).
-
-%% unit_type_to_task(+UnitType, -CoreTask)
-unit_type_to_task(definition,        identify_assumptions).
-unit_type_to_task(claim,             derive_conclusion).
-unit_type_to_task(assumption,        identify_assumptions).
-unit_type_to_task(causal_explanation,explain_mechanism).
-unit_type_to_task(mechanism,         explain_mechanism).
-unit_type_to_task(example,           apply_rule).
-unit_type_to_task(comparison,        compare_models).
-unit_type_to_task(counterargument,   criticise_argument).
-unit_type_to_task(evidence,          evaluate_evidence).
-unit_type_to_task(implication,       predict_consequences).
