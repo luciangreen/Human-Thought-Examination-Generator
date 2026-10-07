@@ -8,6 +8,8 @@
     criterion/3
 ]).
 
+:- use_module(library(lists)).
+
 %% generate_rubric(+Question, -Rubric)
 generate_rubric(question(Id, Type, _Text, _Source, Level, _Reason),
                 rubric(Id, Level, Criteria)) :-

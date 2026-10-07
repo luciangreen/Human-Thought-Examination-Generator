@@ -3,6 +3,9 @@
 %% Run with:  swipl -q -g "run_tests, halt" -t halt tests/test_suite.pl
 
 :- use_module(library(plunit)).
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+:- use_module(library(aggregate)).
 
 :- use_module('../src/text_analysis').
 :- use_module('../src/concept_extraction').
@@ -95,6 +98,35 @@ test(no_duplicate_questions) :-
     L1 =:= L2.
 
 :- end_tests(short_text).
+
+%% ---------------------------------------------------------------------------
+%% Text normalization and preservation
+%% ---------------------------------------------------------------------------
+:- begin_tests(text_analysis).
+
+test(word_count_handles_whitespace_and_strings) :-
+    word_count("One\t two\nthree  four", 4).
+
+test(paragraph_order_is_preserved) :-
+    split_into_paragraphs('First line\ncontinues.\n\nSecond paragraph.', Paragraphs),
+    Paragraphs = ["First line continues.", "Second paragraph."].
+
+test(sentences_split_from_string) :-
+    split_into_sentences("One. Two! Three?", Sentences),
+    Sentences = ["One", "Two", "Three"].
+
+test(task_questions_include_every_unit) :-
+    Tasks = [core_task(explain_mechanism, [
+        thought_unit(t1, mechanism, 'First causal step.'),
+        thought_unit(t2, mechanism, 'Second causal step.')
+    ])],
+    generate_candidate_questions(Tasks, Questions),
+    once(( member(question(_, explain_mechanism, Text, _, _, _), Questions),
+           sub_atom(Text, _, _, _, 'First causal step'),
+           sub_atom(Text, _, _, _, 'Second causal step')
+         )).
+
+:- end_tests(text_analysis).
 
 %% ---------------------------------------------------------------------------
 %% 2. Argumentative essay
@@ -325,13 +357,29 @@ test(response_quality_values) :-
 
 test(removes_identical_type_and_level) :-
     Qs = [
-        question(q1, derive_conclusion, 'What is X?', source, level(2), reason(r)),
-        question(q2, derive_conclusion, 'Describe X.', source, level(2), reason(r)),
+        question(q1, derive_conclusion, 'What is caching?', source, level(2), reason(r)),
+        question(q2, derive_conclusion, 'Describe caching.', source, level(2), reason(r)),
         question(q3, explain_mechanism, 'How does Y work?', source, level(3), reason(r))
     ],
     remove_redundant_questions(Qs, Reduced),
     length(Reduced, L),
     L < 3.
+
+test(merges_overlapping_questions) :-
+    Qs = [
+        question(q1, derive_conclusion, 'What is caching?', source, level(2), reason(r)),
+        question(q2, derive_conclusion, 'Describe caching.', source, level(2), reason(r))
+    ],
+    remove_redundant_questions(Qs, [question(_, _, Merged, _, _, _)]),
+    once(sub_atom(Merged, _, _, _, 'Additionally')).
+
+test(keeps_same_type_questions_about_different_subjects) :-
+    Qs = [
+        question(q1, derive_conclusion, 'What is caching?', source, level(2), reason(r)),
+        question(q2, derive_conclusion, 'What is recursion?', source, level(2), reason(r))
+    ],
+    remove_redundant_questions(Qs, Reduced),
+    length(Reduced, 2).
 
 test(non_overlapping_questions_kept) :-
     Qs = [
@@ -344,6 +392,22 @@ test(non_overlapping_questions_kept) :-
     L >= 2.
 
 :- end_tests(question_compression).
+
+:- begin_tests(difficulty_controls).
+
+test(primary_limits_question_level) :-
+    short_text(T),
+    human_thought_exam(T, [difficulty(primary)], exam(_, Numbered)),
+    Numbered \= [],
+    forall(member(numbered_question(_, question(_, _, _, _, level(L), _)), Numbered),
+           L =< 3).
+
+test(research_retains_advanced_question_levels) :-
+    Questions = [question(q1, evaluate_evidence, 'Assess the evidence.', source, level(6), reason(r))],
+    exam_planning:construct_exam(Questions, [difficulty(research)],
+                                 exam(_, [numbered_question(1, question(_, _, _, _, level(6), _))])).
+
+:- end_tests(difficulty_controls).
 
 %% ---------------------------------------------------------------------------
 %% 17. Answer-leakage detection
@@ -404,6 +468,24 @@ test(no_teacher_answers_in_student_output) :-
     \+ sub_atom(Text, _, _, _, 'expected_reasoning').
 
 :- end_tests(rubric_generation_tests).
+
+:- begin_tests(rubric_task_coverage).
+
+test(specialized_criteria_for_all_question_types) :-
+    forall(
+        member(Type-Criterion, [
+            construct_argument-states_defensible_position,
+            predict_consequences-derives_consequences_logically,
+            resolve_contradiction-identifies_conflicting_claims,
+            apply_rule-applies_principle_to_new_case
+        ]),
+        ( generate_rubric(question(q1, Type, '', source, level(3), reason(r)),
+                          rubric(q1, _, Criteria)),
+          member(criterion(Criterion, _), Criteria)
+        )
+    ).
+
+:- end_tests(rubric_task_coverage).
 
 %% ---------------------------------------------------------------------------
 %% 20. Multiple valid interpretations
@@ -479,6 +561,19 @@ test(benchmark_caching) :-
     FinalCount =< CandidateCount.  %% compression must not increase count
 
 :- end_tests(benchmark).
+
+:- begin_tests(multiple_text_synthesis).
+
+test(generates_synthesis_question_for_multiple_sources) :-
+    generate_synthesis_exam(
+        ['Caching stores previous results.',
+         'Memoization stores results to avoid repeated computation.'],
+        [questions(20)],
+        exam(_, Numbered)),
+    extract_question_types(Numbered, Types),
+    once(member(synthesise_sources, Types)).
+
+:- end_tests(multiple_text_synthesis).
 
 %% ---------------------------------------------------------------------------
 %% Helper predicates for tests

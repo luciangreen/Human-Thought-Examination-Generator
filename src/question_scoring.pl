@@ -7,6 +7,8 @@
     question_score/2
 ]).
 
+:- use_module(library(apply)).
+
 %% score_questions(+Questions, -Scored)
 %% Scored = list of scored_question(Score, Question)
 score_questions(Questions, Scored) :-

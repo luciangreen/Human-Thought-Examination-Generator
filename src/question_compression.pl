@@ -8,6 +8,9 @@
     remove_redundant_questions/2
 ]).
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+
 %% merge_redundant_questions(+Scored, -Reduced)
 %% Works on scored_question/2 terms or plain question/6 terms.
 merge_redundant_questions(Scored, Reduced) :-

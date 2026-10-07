@@ -5,6 +5,9 @@
     derive_reasoning_relations/2
 ]).
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+
 %% derive_reasoning_relations(+ThoughtUnits, -Relations)
 %% Relations = list of reasoning_rel(Type, UnitId1, UnitId2)
 derive_reasoning_relations(ThoughtUnits, Relations) :-

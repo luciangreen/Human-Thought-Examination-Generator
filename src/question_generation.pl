@@ -6,6 +6,9 @@
     question_type/2
 ]).
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+
 %% generate_candidate_questions(+Tasks, -Questions)
 %% Tasks = list of core_task(TaskType, ThoughtUnits)
 %% Questions = list of question(Id, Type, Text, Source, Level, Reason)

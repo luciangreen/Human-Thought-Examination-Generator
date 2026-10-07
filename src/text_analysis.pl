@@ -9,6 +9,8 @@
     classify_sentence/2
 ]).
 
+:- use_module(library(apply)).
+
 %% analyse_text(+Text, -Analysis)
 %% Main entry point.  Produces a structured analysis term.
 analyse_text(Text, analysis(Words, Sentences, Paragraphs)) :-

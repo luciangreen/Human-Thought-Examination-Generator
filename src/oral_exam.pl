@@ -9,6 +9,8 @@
     answer_time/2
 ]).
 
+:- use_module(library(apply)).
+
 :- use_module(exam_planning, [pipeline/3]).
 
 %% generate_oral_exam(+Text, +Options, -Exam)

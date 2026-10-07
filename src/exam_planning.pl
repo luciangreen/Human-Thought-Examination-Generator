@@ -10,6 +10,10 @@
     pipeline/3
 ]).
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+:- use_module(library(pairs)).
+
 :- use_module(question_generation, [generate_candidate_questions/2]).
 :- use_module(concept_extraction,  [extract_thought_units/2]).
 :- use_module(text_analysis,       [analyse_text/2]).
