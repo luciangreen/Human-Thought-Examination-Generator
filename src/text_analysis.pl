@@ -19,17 +19,15 @@ analyse_text(Text, analysis(Words, Sentences, Paragraphs)) :-
 
 %% word_count(+Text, -Count)
 word_count(Text, Count) :-
-    atomic(Text),
-    atomic_list_concat(Parts, ' ', Text),
+    text_string(Text, String),
+    split_string(String, " \t\n\r", " \t\n\r", Parts),
     length(Parts, Count).
 
 %% split_into_sentences(+Text, -Sentences)
 %% Very lightweight sentence splitter on terminal punctuation.
 split_into_sentences(Text, Sentences) :-
-    atomic(Text),
-    atom_string(Text, S),
-    split_string(S, "", "", [S1]),
-    sentence_split(S1, RawSentences),
+    text_string(Text, String),
+    sentence_split(String, RawSentences),
     include(non_empty_string, RawSentences, Sentences).
 
 sentence_split(S, Sentences) :-
@@ -37,16 +35,41 @@ sentence_split(S, Sentences) :-
     maplist(string_trim, Parts0, Sentences).
 
 string_trim(S, T) :-
-    split_string(S, "", " \t\n\r", [T|_]).
+    normalize_space(string(T), S).
 
 non_empty_string(S) :- S \= "".
 
 %% split_into_paragraphs(+Text, -Paragraphs)
 split_into_paragraphs(Text, Paragraphs) :-
-    atomic(Text),
-    atom_string(Text, S),
-    ( split_string(S, "\n\n", "", Ps0) -> true ; Ps0 = [S] ),
+    text_string(Text, String),
+    split_string(String, "\n", "\r", Lines),
+    paragraphs_from_lines(Lines, Ps0),
     include(non_empty_string, Ps0, Paragraphs).
+
+text_string(Text, String) :-
+    (   string(Text)
+    ->  String = Text
+    ;   atom(Text)
+    ->  atom_string(Text, String)
+    ).
+
+paragraphs_from_lines(Lines, Paragraphs) :-
+    foldl(add_paragraph_line, Lines, []-[], Reversed-Current),
+    finish_paragraph(Reversed, Current, Paragraphs).
+
+add_paragraph_line(Line, Paragraphs0-Current0, Paragraphs-Current) :-
+    normalize_space(string(Trimmed), Line),
+    (   Trimmed = ""
+    ->  finish_paragraph(Paragraphs0, Current0, Paragraphs),
+        Current = []
+    ;   Paragraphs = Paragraphs0,
+        Current = [Trimmed|Current0]
+    ).
+
+finish_paragraph(Paragraphs, [], Paragraphs).
+finish_paragraph(Paragraphs0, Lines, [Paragraph|Paragraphs0]) :-
+    reverse(Lines, OrderedLines),
+    atomics_to_string(OrderedLines, " ", Paragraph).
 
 %% classify_sentence(+Sentence, -Class)
 %% Classes: definition, claim, example, mechanism, comparison, assumption, conclusion
