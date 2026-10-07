@@ -187,10 +187,15 @@ generate_questions_for_task(_Task, Units, N0, Qs, N) :-
     Qs = [question(Id, derive_conclusion, Q1, inference, level(3), reason(general_analysis))].
 
 %% extract_content_summary(+Units, -Summary)
-extract_content_summary([thought_unit(_, _, Content)|_], Summary) :-
+extract_content_summary(Units, Summary) :-
+    Units = [_|_],
     !,
-    ( string(Content) -> atom_string(Summary, Content) ; Summary = Content ).
+    maplist(unit_content_atom, Units, Contents),
+    atomic_list_concat(Contents, '; ', Summary).
 extract_content_summary([], "the text").
+
+unit_content_atom(thought_unit(_, _, Content), Atom) :-
+    ( string(Content) -> atom_string(Atom, Content) ; Atom = Content ).
 
 %% question_type(?Type, ?Description)
 question_type(explain_mechanism,    "explain a causal process").

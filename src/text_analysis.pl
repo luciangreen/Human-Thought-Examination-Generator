@@ -55,7 +55,8 @@ text_string(Text, String) :-
 
 paragraphs_from_lines(Lines, Paragraphs) :-
     foldl(add_paragraph_line, Lines, []-[], Reversed-Current),
-    finish_paragraph(Reversed, Current, Paragraphs).
+    finish_paragraph(Reversed, Current, ReversedParagraphs),
+    reverse(ReversedParagraphs, Paragraphs).
 
 add_paragraph_line(Line, Paragraphs0-Current0, Paragraphs-Current) :-
     normalize_space(string(Trimmed), Line),

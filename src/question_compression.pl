@@ -39,19 +39,20 @@ remove_redundant_questions(Questions, Unique) :-
 
 remove_redundant_questions([], Acc, Acc).
 remove_redundant_questions([Q|Qs], Acc, Result) :-
-    (   any_overlaps(Q, Acc)
-    ->  remove_redundant_questions(Qs, Acc, Result)
+    (   merge_with_overlap(Q, Acc, MergedAcc)
+    ->  remove_redundant_questions(Qs, MergedAcc, Result)
     ;   remove_redundant_questions(Qs, [Q|Acc], Result)
     ).
 
-any_overlaps(Q, Others) :-
-    member(Other, Others),
+merge_with_overlap(Q, [Other|Rest], [Merged|Rest]) :-
     questions_overlap(Q, Other),
-    !.
+    !,
+    merge_questions(Other, Q, Merged).
+merge_with_overlap(Q, [Other|Rest], [Other|MergedRest]) :-
+    merge_with_overlap(Q, Rest, MergedRest).
 
 %% questions_overlap(+Q1, +Q2)
 %% True when Q1 and Q2 test essentially the same intellectual task.
-questions_overlap(question(_, Type, _, _, Level, _), question(_, Type, _, _, Level, _)) :- !.
 questions_overlap(Q1, Q2) :-
     Q1 = question(_, _, Text1, _, _, _),
     Q2 = question(_, _, Text2, _, _, _),
