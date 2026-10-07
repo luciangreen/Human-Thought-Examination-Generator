@@ -10,6 +10,7 @@
 ]).
 
 :- use_module(library(apply)).
+:- use_module(library(lists)).
 
 %% analyse_text(+Text, -Analysis)
 %% Main entry point.  Produces a structured analysis term.

@@ -16,7 +16,7 @@
 merge_redundant_questions(Scored, Reduced) :-
     extract_questions(Scored, Questions),
     remove_redundant_questions(Questions, Compressed),
-    rewrap_scored(Scored, Compressed, Reduced).
+    maplist(rewrap_compressed_question(Scored), Compressed, Reduced).
 
 extract_questions([], []).
 extract_questions([scored_question(_, Q)|Rest], [Q|Qs]) :-
@@ -24,17 +24,11 @@ extract_questions([scored_question(_, Q)|Rest], [Q|Qs]) :-
 extract_questions([Q|Rest], [Q|Qs]) :-
     extract_questions(Rest, Qs).
 
-rewrap_scored([], _, []).
-rewrap_scored([scored_question(S, Q)|Rest], Compressed, [scored_question(S, Q)|Reduced]) :-
-    member(Q, Compressed), !,
-    rewrap_scored(Rest, Compressed, Reduced).
-rewrap_scored([scored_question(_, _)|Rest], Compressed, Reduced) :-
-    rewrap_scored(Rest, Compressed, Reduced).
-rewrap_scored([Q|Rest], Compressed, [Q|Reduced]) :-
-    member(Q, Compressed), !,
-    rewrap_scored(Rest, Compressed, Reduced).
-rewrap_scored([_|Rest], Compressed, Reduced) :-
-    rewrap_scored(Rest, Compressed, Reduced).
+rewrap_compressed_question(Scored, Question, scored_question(Score, Question)) :-
+    Question = question(Id, _, _, _, _, _),
+    member(scored_question(Score, question(Id, _, _, _, _, _)), Scored),
+    !.
+rewrap_compressed_question(_, Question, Question).
 
 %% remove_redundant_questions(+Questions, -Unique)
 remove_redundant_questions(Questions, Unique) :-

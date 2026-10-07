@@ -55,6 +55,8 @@ not yet satisfy every item in `pr1.txt`:
   source context.
 - Oral follow-ups are static templates: there is no live adaptive examiner,
   examiner-prompt system, or complexity-based response-time estimate.
+- Socratic mode currently uses the ordinary ordered question set; it does not yet
+  build a distinct discovery-guiding dialogue.
 - Researcher, tutorial, revision, viva, and discipline-specific reasoning modes
   are not implemented as distinct workflows.
 - Assignment options such as word limits, open-book policy, and reference policy

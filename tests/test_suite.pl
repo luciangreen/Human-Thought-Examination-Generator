@@ -373,6 +373,14 @@ test(merges_overlapping_questions) :-
     remove_redundant_questions(Qs, [question(_, _, Merged, _, _, _)]),
     once(sub_atom(Merged, _, _, _, 'Additionally')).
 
+test(merged_questions_survive_scoring_wrapper) :-
+    Scored = [
+        scored_question(8, question(q1, derive_conclusion, 'What is caching?', source, level(2), reason(r))),
+        scored_question(7, question(q2, derive_conclusion, 'Describe caching.', source, level(2), reason(r)))
+    ],
+    merge_redundant_questions(Scored, [scored_question(8, question(q1, _, Merged, _, _, _))]),
+    once(sub_atom(Merged, _, _, _, 'Additionally')).
+
 test(keeps_same_type_questions_about_different_subjects) :-
     Qs = [
         question(q1, derive_conclusion, 'What is caching?', source, level(2), reason(r)),
