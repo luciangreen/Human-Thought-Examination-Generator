@@ -5,6 +5,9 @@
     derive_core_tasks/2
 ]).
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+
 %% derive_core_tasks(+ThoughtUnits, -Tasks)
 %% Tasks = list of core_task(TaskType, ThoughtUnits)
 derive_core_tasks(ThoughtUnits, Tasks) :-

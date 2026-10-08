@@ -8,12 +8,15 @@
     remove_redundant_questions/2
 ]).
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+
 %% merge_redundant_questions(+Scored, -Reduced)
 %% Works on scored_question/2 terms or plain question/6 terms.
 merge_redundant_questions(Scored, Reduced) :-
     extract_questions(Scored, Questions),
     remove_redundant_questions(Questions, Compressed),
-    rewrap_scored(Scored, Compressed, Reduced).
+    maplist(rewrap_compressed_question(Scored), Compressed, Reduced).
 
 extract_questions([], []).
 extract_questions([scored_question(_, Q)|Rest], [Q|Qs]) :-
@@ -21,17 +24,11 @@ extract_questions([scored_question(_, Q)|Rest], [Q|Qs]) :-
 extract_questions([Q|Rest], [Q|Qs]) :-
     extract_questions(Rest, Qs).
 
-rewrap_scored([], _, []).
-rewrap_scored([scored_question(S, Q)|Rest], Compressed, [scored_question(S, Q)|Reduced]) :-
-    member(Q, Compressed), !,
-    rewrap_scored(Rest, Compressed, Reduced).
-rewrap_scored([scored_question(_, _)|Rest], Compressed, Reduced) :-
-    rewrap_scored(Rest, Compressed, Reduced).
-rewrap_scored([Q|Rest], Compressed, [Q|Reduced]) :-
-    member(Q, Compressed), !,
-    rewrap_scored(Rest, Compressed, Reduced).
-rewrap_scored([_|Rest], Compressed, Reduced) :-
-    rewrap_scored(Rest, Compressed, Reduced).
+rewrap_compressed_question(Scored, Question, scored_question(Score, Question)) :-
+    Question = question(Id, _, _, _, _, _),
+    member(scored_question(Score, question(Id, _, _, _, _, _)), Scored),
+    !.
+rewrap_compressed_question(_, Question, Question).
 
 %% remove_redundant_questions(+Questions, -Unique)
 remove_redundant_questions(Questions, Unique) :-
@@ -39,19 +36,20 @@ remove_redundant_questions(Questions, Unique) :-
 
 remove_redundant_questions([], Acc, Acc).
 remove_redundant_questions([Q|Qs], Acc, Result) :-
-    (   any_overlaps(Q, Acc)
-    ->  remove_redundant_questions(Qs, Acc, Result)
+    (   merge_with_overlap(Q, Acc, MergedAcc)
+    ->  remove_redundant_questions(Qs, MergedAcc, Result)
     ;   remove_redundant_questions(Qs, [Q|Acc], Result)
     ).
 
-any_overlaps(Q, Others) :-
-    member(Other, Others),
+merge_with_overlap(Q, [Other|Rest], [Merged|Rest]) :-
     questions_overlap(Q, Other),
-    !.
+    !,
+    merge_questions(Other, Q, Merged).
+merge_with_overlap(Q, [Other|Rest], [Other|MergedRest]) :-
+    merge_with_overlap(Q, Rest, MergedRest).
 
 %% questions_overlap(+Q1, +Q2)
 %% True when Q1 and Q2 test essentially the same intellectual task.
-questions_overlap(question(_, Type, _, _, Level, _), question(_, Type, _, _, Level, _)) :- !.
 questions_overlap(Q1, Q2) :-
     Q1 = question(_, _, Text1, _, _, _),
     Q2 = question(_, _, Text2, _, _, _),

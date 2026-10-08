@@ -10,6 +10,10 @@
     pipeline/3
 ]).
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+:- use_module(library(pairs)).
+
 :- use_module(question_generation, [generate_candidate_questions/2]).
 :- use_module(concept_extraction,  [extract_thought_units/2]).
 :- use_module(text_analysis,       [analyse_text/2]).
@@ -94,15 +98,24 @@ apply_question_count(Questions, Options, Selected) :-
     length(Selected, Take),
     append(Selected, _, Questions).
 
-apply_difficulty(Questions, Options, Questions) :-
-    ( member(difficulty(D), Options) -> min_level_for_difficulty(D, _) ; true ).
+apply_difficulty(Questions, Options, Filtered) :-
+    (   member(difficulty(D), Options),
+        max_level_for_difficulty(D, MaxLevel)
+    ->  include(question_at_or_below(MaxLevel), Questions, Filtered)
+    ;   Filtered = Questions
+    ).
 
-min_level_for_difficulty(primary,       1).
-min_level_for_difficulty(secondary,     2).
-min_level_for_difficulty(undergraduate, 2).
-min_level_for_difficulty(postgraduate,  3).
-min_level_for_difficulty(research,      4).
-min_level_for_difficulty(expert,        5).
+max_level_for_difficulty(primary,       3).
+max_level_for_difficulty(secondary,     4).
+max_level_for_difficulty(undergraduate, 5).
+max_level_for_difficulty(postgraduate,  6).
+max_level_for_difficulty(research,      7).
+max_level_for_difficulty(expert,        7).
+
+question_at_or_below(MaxLevel, question(_, _, _, _, level(Level), _)) :-
+    Level =< MaxLevel.
+question_at_or_below(_, Question) :-
+    \+ (Question = question(_, _, _, _, level(_), _)).
 
 assign_exam_numbers([], _, []).
 assign_exam_numbers([Q|Qs], N, [numbered_question(N, Q)|Numbered]) :-

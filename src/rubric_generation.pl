@@ -8,6 +8,8 @@
     criterion/3
 ]).
 
+:- use_module(library(lists)).
+
 %% generate_rubric(+Question, -Rubric)
 generate_rubric(question(Id, Type, _Text, _Source, Level, _Reason),
                 rubric(Id, Level, Criteria)) :-
@@ -95,6 +97,42 @@ rubric_criteria(synthesise_sources, Level, Criteria) :-
         criterion(identifies_genuine_disagreements, 4),
         criterion(constructs_coherent_synthesis, 4),
         criterion(acknowledges_residual_tensions, 3)
+        | Base
+    ].
+
+rubric_criteria(construct_argument, Level, Criteria) :-
+    base_criteria(Level, Base),
+    Criteria = [
+        criterion(states_defensible_position, 3),
+        criterion(supports_claims_with_reasons, 4),
+        criterion(addresses_strong_objections, 3)
+        | Base
+    ].
+
+rubric_criteria(predict_consequences, Level, Criteria) :-
+    base_criteria(Level, Base),
+    Criteria = [
+        criterion(identifies_relevant_conditions, 3),
+        criterion(derives_consequences_logically, 4),
+        criterion(recognises_uncertainty, 3)
+        | Base
+    ].
+
+rubric_criteria(resolve_contradiction, Level, Criteria) :-
+    base_criteria(Level, Base),
+    Criteria = [
+        criterion(identifies_conflicting_claims, 3),
+        criterion(tests_possible_resolutions, 4),
+        criterion(states_remaining_tension, 3)
+        | Base
+    ].
+
+rubric_criteria(apply_rule, Level, Criteria) :-
+    base_criteria(Level, Base),
+    Criteria = [
+        criterion(applies_principle_to_new_case, 4),
+        criterion(justifies_relevant_similarities, 3),
+        criterion(identifies_limits_of_transfer, 3)
         | Base
     ].
 

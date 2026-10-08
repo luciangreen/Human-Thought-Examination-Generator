@@ -11,6 +11,8 @@
     exam_to_text/2
 ]).
 
+:- use_module(library(apply)).
+
 %% format_exam(+Exam, -Text)
 %% format_exam(+Exam, +Format, -Text)   Format: text | prolog
 format_exam(Exam, Text) :-
