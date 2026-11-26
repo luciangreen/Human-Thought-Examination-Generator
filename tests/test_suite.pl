@@ -126,6 +126,32 @@ test(task_questions_include_every_unit) :-
            sub_atom(Text, _, _, _, 'Second causal step')
          )).
 
+test(central_claim_is_one_sentence) :-
+    Tasks = [core_task(derive_conclusion, [
+        thought_unit(t1, claim, 'Caching makes repeated computation faster.'),
+        thought_unit(t2, claim, 'The cat sat on the mat.'),
+        thought_unit(t3, claim, 'Faster repeated computation saves energy.')
+    ])],
+    generate_candidate_questions(Tasks, [question(_, _, Q1, _, _, _)|_]),
+    assertion(sub_atom(Q1, _, _, _, 'caching makes repeated computation faster')),
+    assertion(\+ sub_atom(Q1, _, _, _, ';')),
+    assertion(\+ sub_atom(Q1, _, _, _, 'cat')).
+
+test(no_premise_question_without_reasons) :-
+    Tasks = [core_task(derive_conclusion, [thought_unit(t1, claim, 'The cat sat on the mat.')])],
+    generate_candidate_questions(Tasks, [_, question(_, _, Q2, _, _, _)|_]),
+    assertion(sub_atom(Q2, _, _, _, 'without giving reasons')).
+
+test(premise_question_with_reasons) :-
+    Tasks = [core_task(derive_conclusion, [thought_unit(t1, claim, 'Prices rose because supply fell.')])],
+    generate_candidate_questions(Tasks, [_, question(_, _, Q2, _, _, _)|_]),
+    assertion(sub_atom(Q2, _, _, _, 'premises are necessary')).
+
+test(alternative_question_names_claim) :-
+    Tasks = [core_task(derive_conclusion, [thought_unit(t1, claim, 'Prices rose because supply fell.')])],
+    generate_candidate_questions(Tasks, [_, _, question(_, _, Q3, _, _, _)|_]),
+    assertion(sub_atom(Q3, _, _, _, 'prices rose because supply fell')).
+
 :- end_tests(text_analysis).
 
 %% ---------------------------------------------------------------------------

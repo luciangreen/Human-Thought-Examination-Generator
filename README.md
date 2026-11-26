@@ -64,3 +64,13 @@ not yet satisfy every item in `pr1.txt`:
   than changing question sophistication.
 - The benchmark suite and full cross-discipline quality properties described in
   the specification are not present.
+
+## The claim in each question
+
+Questions about a claim name one central sentence, the one that shares the
+most content words with the rest of the text, rather than every sentence
+joined by semicolons. Questions about a mechanism still list all its steps.
+If the text gives no reasons (no "because", "so", "if", "therefore" and
+similar), the premise question asks what reasons could support or challenge
+the claim instead. Questions that suggest an alternative or a test name the
+claim they are about.
