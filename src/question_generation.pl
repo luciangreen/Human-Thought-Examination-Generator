@@ -22,7 +22,8 @@ generate_from_task(core_task(Task, Units), N-Acc, N2-Acc2) :-
     append(Acc, NewQs, Acc2).
 
 generate_questions_for_task(explain_mechanism, Units, N0, Qs, N) :-
-    extract_content_summary(Units, Summary),
+    % A mechanism is all of its steps, so every unit is named here.
+    extract_all_units(Units, Summary),
     atom_concat(q, N0, Id),
     N1 is N0 + 1,
     atom_concat(q, N1, Id2),
@@ -59,9 +60,12 @@ generate_questions_for_task(derive_conclusion, Units, N0, Qs, N) :-
     N2 is N1 + 1,
     atom_concat(q, N2, Id3),
     N is N2 + 1,
-    format(atom(Q1), "What is the central claim being made about ~w? State it in your own words.", [Summary]),
-    format(atom(Q2), "Which premises are necessary for this claim? Which is least well-supported?", []),
-    format(atom(Q3), "Construct an alternative explanation and state what evidence would distinguish the two.", []),
+    format(atom(Q1), "What is the central claim being made in the statement that ~w? State it in your own words.", [Summary]),
+    (   has_reasoning(Units)
+    ->  format(atom(Q2), "Which premises are necessary for this claim? Which is least well-supported?", [])
+    ;   format(atom(Q2), "The text states this without giving reasons. What reasons could support or challenge it?", [])
+    ),
+    format(atom(Q3), "Construct an alternative explanation to the claim that ~w, and state what evidence would distinguish the two.", [Summary]),
     Qs = [
         question(Id,  derive_conclusion,   Q1, source,    level(2), reason(reconstruct_argument)),
         question(Id2, evaluate_evidence,   Q2, inference, level(4), reason(evaluate_premises)),
@@ -114,7 +118,7 @@ generate_questions_for_task(evaluate_evidence, Units, N0, Qs, N) :-
     atom_concat(q, N1, Id2),
     N is N1 + 1,
     format(atom(Q1), "Evaluate the evidence offered for the claim about ~w. What would strengthen or weaken it?", [Summary]),
-    format(atom(Q2), "Design an observation or experiment that could test the central claim.", []),
+    format(atom(Q2), "Design an observation or experiment that could test the claim that ~w.", [Summary]),
     Qs = [
         question(Id,  evaluate_evidence, Q1, source,    level(4), reason(evidence_evaluation)),
         question(Id2, design_solution,   Q2, extension, level(5), reason(experimental_design))
@@ -190,15 +194,104 @@ generate_questions_for_task(_Task, Units, N0, Qs, N) :-
     Qs = [question(Id, derive_conclusion, Q1, inference, level(3), reason(general_analysis))].
 
 %% extract_content_summary(+Units, -Summary)
+%% The one central sentence of the units, written to follow "the claim that"
+%% or "about": the sentence sharing the most content words with the others,
+%% without its full stop, with a lower-case first letter (unless it starts
+%% with an acronym or "I"), and cut to twenty words.
 extract_content_summary(Units, Summary) :-
     Units = [_|_],
     !,
-    maplist(unit_content_atom, Units, Contents),
-    atomic_list_concat(Contents, '; ', Summary).
+    % Units can arrive in any order; put them back in text order first.
+    findall(K-U, ( member(U, Units), unit_order(U, K) ), Keyed),
+    keysort(Keyed, SortedKeyed),
+    findall(U, member(_-U, SortedKeyed), Ordered),
+    maplist(unit_content_string, Ordered, Contents),
+    central_content(Contents, Central),
+    tidy_claim(Central, Summary).
 extract_content_summary([], "the text").
 
-unit_content_atom(thought_unit(_, _, Content), Atom) :-
-    ( string(Content) -> atom_string(Atom, Content) ; Atom = Content ).
+% Units are numbered t1, t2, ...; anything else keeps its place.
+unit_order(thought_unit(Id, _, _), K) :-
+    (   atom(Id), sub_atom(Id, 1, _, 0, Digits), atom_number(Digits, N)
+    ->  K = N
+    ;   K = 0
+    ).
+
+unit_content_string(thought_unit(_, _, Content), String) :-
+    ( string(Content) -> String = Content ; atom_string(Content, String) ).
+
+central_content([Only], Only) :- !.
+central_content(Contents, Central) :-
+    findall(Score-Index,
+            ( nth1(Index, Contents, C),
+              content_words(C, Words),
+              findall(W, ( member(W, Words),
+                           nth1(J, Contents, Other), J \== Index,
+                           content_words(Other, OtherWords),
+                           memberchk(W, OtherWords) ), Shared),
+              length(Shared, Score0),
+              Score is -Score0 ),
+            Pairs),
+    keysort(Pairs, [_-Best|_]),
+    nth1(Best, Contents, Central).
+
+content_words(Text, Words) :-
+    string_lower(Text, Lower),
+    split_string(Lower, " ,.;:!?()\"", " ,.;:!?()\"", Parts),
+    include([P]>>(string_length(P, L), L > 3), Parts, Words0),
+    sort(Words0, Words).
+
+tidy_claim(Text0, Claim) :-
+    normalize_space(string(Text1), Text0),
+    (   sub_string(Text1, B, 1, 0, Last), memberchk(Last, [".", "!", "?"])
+    ->  sub_string(Text1, 0, B, 1, Text2)
+    ;   Text2 = Text1
+    ),
+    lower_first(Text2, Text3),
+    split_string(Text3, " ", "", Words),
+    length(Words, N),
+    (   N > 20
+    ->  length(First20, 20), append(First20, _, Words),
+        atomic_list_concat(First20, ' ', A), atom_concat(A, ' ...', Claim0)
+    ;   atom_string(Claim0, Text3)
+    ),
+    Claim = Claim0.
+
+lower_first(Text, Lowered) :-
+    (   sub_string(Text, 0, 2, _, Two),
+        string_chars(Two, [C1, C2]),
+        ( char_type(C2, upper) ; C1 == 'I', C2 == ' ' )
+    ->  Lowered = Text
+    ;   sub_string(Text, 0, 1, After, First),
+        sub_string(Text, 1, After, 0, Rest),
+        string_lower(First, LowerFirst),
+        string_concat(LowerFirst, Rest, Lowered)
+    ).
+
+%% extract_all_units(+Units, -Summary)
+%% Every unit in text order, joined by semicolons (for mechanisms, whose
+%% steps all matter).
+extract_all_units(Units, Summary) :-
+    Units = [_|_],
+    !,
+    findall(K-U, ( member(U, Units), unit_order(U, K) ), Keyed),
+    keysort(Keyed, SortedKeyed),
+    findall(A, ( member(_-thought_unit(_, _, C), SortedKeyed),
+                 ( string(C) -> atom_string(A, C) ; A = C ) ), Contents),
+    atomic_list_concat(Contents, '; ', Summary).
+extract_all_units([], "the text").
+
+%% has_reasoning(+Units)
+%% The units give at least one reason, cause or condition.
+has_reasoning(Units) :-
+    member(thought_unit(_, _, C), Units),
+    ( string(C) -> S = C ; atom_string(C, S) ),
+    string_lower(S, L),
+    member(Marker, [" because ", " so ", " therefore ", " since ", "if ", " thus ",
+                    " causes ", " leads to ", " determines ", " means ", " implies ",
+                    " results in ", " can make "]),
+    sub_string(L, _, _, _, Marker),
+    !.
 
 %% question_type(?Type, ?Description)
 question_type(explain_mechanism,    "explain a causal process").
